@@ -234,7 +234,7 @@ For any series `m` and timestamps `T₀ < T₁ < T₂` with `r₁ = T₁ − T�
 = increase(m[r₁ + r₂] anchored)  @ T₂
 ```
 
-This equality is exact: the left-open / right-closed range membership `(start, end]` plus the separate lookback anchor at `start` ensure that the boundary sample at `T₁` is "last in the earlier range" and "anchor of the later range" — rather than double-membership — so its delta is counted exactly once. The partial-dataset illustration below (where two adjacent time windows individually over- or under-estimate, but together capture the total increase of 11) is this property in action.
+This equality is exact: the left-open / right-closed range membership `(start, end]` along with the separate lookback anchor at `start` ensure that the boundary sample at `T₁` is "last in the earlier range" and "anchor of the later range" — rather than double-membership — so its delta is counted exactly once. The partial-dataset illustration below (where two adjacent time windows individually over- or under-estimate, but together capture the total increase of 11) is this property in action.
 
 This guarantee has practical consequences worth documenting: alerts, recording rules, and dashboards can freely re-window without numerical drift, including across irregular scrapes. See [prometheus/prometheus#18679](https://github.com/prometheus/prometheus/issues/18679) for the precise statement and proposed invariant tests covering uniform, off-cadence, and partial-dataset cases.
 

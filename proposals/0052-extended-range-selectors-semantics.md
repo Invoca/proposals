@@ -222,6 +222,20 @@ increase(http_requests_total[5m] anchored)
 - Improved composability across range boundaries
 - Ensuring observed values are never skipped due to alignment issues
 
+**Composability as the additive property**
+
+The "composability across range boundaries" use case above is the *additive* property of `anchored`-mode `increase` (and equivalently `rate` and `delta`): the value of a wider range equals the sum of the values of any partition of that range into contiguous sub-ranges. For any series `m` and timestamps `T₀ < T₁ < T₂` with `r₁ = T₁ − T₀` (≤ lookback delta) and `r₂ = T₂ − T₁`:
+
+```
+  increase(m[r₁]      anchored)  @ T₁
++ increase(m[r₂]      anchored)  @ T₂
+= increase(m[r₁ + r₂] anchored)  @ T₂
+```
+
+This equality is exact (not just "improved"): the left-open / right-closed range membership `(start, end]` plus the separate lookback anchor at `start` give the boundary sample at `T₁` a *dual* role — "last in the earlier range" and "anchor of the later range" — rather than double-membership, so its delta is counted exactly once. The partial-dataset illustration below (where two windows individually estimate but together capture the total increase of 11) is this property in action.
+
+Additivity is a stronger guarantee than "composability" alone suggests, and it has practical consequences worth documenting: alerts, recording rules, and dashboards can freely re-window without numerical drift, including across irregular scrapes. See [prometheus/prometheus#18679](https://github.com/prometheus/prometheus/issues/18679) for the proof sketch and proposed invariant tests covering uniform, off-cadence, and partial-dataset cases.
+
 **Anchored increase and complete dataset**
 
 ![](../assets/2025-04-04_extended-range-selectors-semantics/anchored-increase-complete.png)
